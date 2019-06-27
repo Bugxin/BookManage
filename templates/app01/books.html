@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查看书籍</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div>
+        <a type="button" class="btn btn-info pull-right" href="/app01/index/">回到首页</a>
+
+        <button class="btn btn-info" type="button"
+                data-toggle="modal" data-target="#myModal" onclick="showMode(1)">添加书籍</button>
+    </div>
+    <table class="table table-striped  table-bordered">
+      <thead>
+        <tr>
+            <th>编号</th>
+            <th>书名</th>
+            <th>价格</th>
+            <th>出版日期</th>
+            <th>出版社</th>
+            <th>作者</th>
+            <th>删除操作</th>
+            <th>编辑操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in book_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.publishDate|date:'Y-m-d' }}</td>
+                <td>{{ item.publish.name }}</td>
+                <td>
+                    {% for author in item.authors.all %}
+                        {% if forloop.last %}
+                            <span>{{ author.name }}</span>
+                        {% else %}
+                            <span>{{ author.name }}</span>,
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                    <a href='/app01/delBook/{{ item.pk }}' class="btn btn-success" role="button">删除</a>
+                </td>
+                <td>
+                    <button class="btn btn-success" type="button"
+                            data-toggle="modal" data-target="#myModal"
+                            onclick="showMode(0, {{ item.pk }})">编辑</button>
+                </td>
+            </tr>
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+    {#  展示页码  #}
+    <div>
+        {% include 'app01/my_page.html' %}
+    </div>
+</div>
+
+{# 模态框   书本信息  #}
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">书籍信息</h4>
+            </div>
+            <div class="modal-body">
+                <form id="id_modal_form">
+                    <div class="form-group">
+                        <label>书籍名称</label>
+                        <input type="text" class="form-control" name="title" id="id_title">
+                    </div>
+                    <div class="form-group">
+                        <label>价格</label>
+                        <input type="text" class="form-control" name="price"
+                                id='id_price'>
+                    </div>
+                    <div class="form-group">
+                        <label>出版社</label>
+                        <select name="publish_id" id="id_publish" class="form-control">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>出版日期</label>
+                        <input type="date" class="form-control" name="date" id="id_date">
+                    </div>
+                    <div class="form-group">
+                        <label>作者</label>
+                        <select type="text" name="authors_id_list" multiple class="form-control" id="id_author">
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer" id = 'id_footer'>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.bootcdn.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+    {#模态框  添加与编辑是同一个模态框 #}
+    function showMode(on, book_id=0) {
+        let authors = new Array()
+        let publishes = new Array()
+        $.ajax({
+            url: '/app01/get_authors/',
+            type: 'get',
+            contentType: 'application/json; charset=UTF-8',
+            async: false,   // 同步方式  否则界面可能无数据
+            success: function (data) {
+                authors=JSON.parse(data)
+            }
+        })
+
+        $.ajax({
+            url: '/app01/get_publishes/',
+            type: 'get',
+            contentType: 'application/json; charset=UTF-8',
+            async: false,  // 同步方式  否则界面可能无数据
+            success: function (data) {
+                publishes=JSON.parse(data)
+            }
+        })
+        if(!on){
+            {#on=0  修改#}
+            showmodify(book_id, authors, publishes)
+            $('#id_footer').empty()
+            $(`<button type="button" class="btn btn-success pull-right" id = "id_modify"
+onclick="tomodify()"></button>`)
+                .appendTo($('#id_footer')).html('修改')
+        }else {
+            {#on =1 添加 #}
+            showadd(authors, publishes)
+            $('#id_footer').empty()
+            $(`<button type="button" class="btn btn-success pull-right" id = "id_add" onclick="toadd()"></button>`)
+                .appendTo($('#id_footer')).html('添加')
+        }
+    }
+
+     {# 修改界面 #}
+   function showmodify(book_id, all_author, all_publish) {
+
+       $.ajax({
+           url: '/app01/editBook/'+ book_id + '/',
+           type: 'get',
+           contentType: 'application/json; charset=UTF-8',
+           success:function (data) {
+               let res = JSON.parse(data)
+               $('#id_modal_form').append(`<div class="form-group">
+                        <input type="hidden" name='id' id='id_bookid' value="">
+                        </div>`)
+               $('#id_bookid').val(res.id)
+               $('#id_price').val(res.price)
+               $('#id_title').val(res.title)
+               $('#id_date').val(res.publish_date)
+               $('#id_publish').html('')  //先清空 不然会重复显示
+               for (let i=0; i < all_publish.length; i++){
+                   if(all_publish[i].name == res.publish){
+                       $(`<option selected value = "${all_publish[i].id}"></option>`)
+                           .appendTo($('#id_publish')).html(all_publish[i].name)
+                   }
+                   else {
+                       $(`<option value="${all_publish[i].id}"></option>`)
+                           .appendTo($('#id_publish')).html(all_publish[i].name)
+                   }
+               }
+               $('#id_author').html('')
+                for (let i=0; i < all_author.length; i++){
+                    $(`<option value = "${all_author[i].id}" id="id_${i}"></option>`)
+                        .appendTo($('#id_author')).html(all_author[i].name)
+                    for(let j =0; j < res.author.length; ++j){
+                        if(all_author[i].name === res.author[j]){
+                            $('#id_'+i).appendTo($('#id_author')).attr('selected','selected')
+                        }
+                    }
+               }
+               $('#id_title').attr('readonly', 'readonly')
+
+           }
+       })
+   }
+
+
+    {# 添加界面  #}
+    function showadd(authors, publishes){
+
+        $('#id_price').val('')
+        $('#id_title').val('').removeAttr('readonly')
+        $('#id_date').val('')
+        $('#id_publish').html('')
+        for (let i=0; i < publishes.length; i++){
+
+            $(`<option value="${publishes[i].id}"></option>`).appendTo($('#id_publish')).html(publishes[i].name)
+
+        }
+        $('#id_author').html('')
+        for (let i=0; i < authors.length; i++){
+
+            $(`<option value="${authors[i].id}"></option>`).appendTo($('#id_author')).html(authors[i].name)
+
+        }
+    }
+
+    {#    修改请求    #}
+    function tomodify() {
+        let book_id = $('#id_bookid').val()
+        $.ajax({
+            url:'/app01/editBook/' + book_id + '/',
+            type: 'post',
+            contentType: 'application/json',
+            data:JSON.stringify({
+                'title': $('#id_title').val(),
+                'price': $('#id_price').val(),
+                'publish_id': $('#id_publish').val(),
+                'date': $('#id_date').val(),
+                'authors_id_list': $('#id_author').val(),
+            }),
+            success: function (data) {
+                let res = JSON.parse(data)
+                if (res.state){
+                    {#登录成功 跳转查看书籍#}
+                    location.href = '/app01/books/'
+                }
+                else {
+                    alert(res.msg)
+                }
+            }
+        })
+    };
+
+    {#    添加请求    #}
+    function toadd() {
+        $.ajax({
+            url:'/app01/addBook/',
+            type: 'post',
+            contentType: 'application/json; charset=UTF-8',
+            data:JSON.stringify({
+                'title': $('#id_title').val(),
+                'price': $('#id_price').val(),
+                'publish_id': $('#id_publish').val(),
+                'date': $('#id_date').val(),
+                'authors_id_list': $('#id_author').val(),
+            }),
+            success: function (data) {
+                let res = JSON.parse(data)
+                if (res.state){
+                    {#添加成功 跳转查看书籍#}
+                    location.href = '/app01/books/'
+                }
+                else {
+                    {#添加失败 弹出警告框#}
+                    alert(res.msg)
+                }
+            }
+        })
+    };
+
+
+
+
+</script>
+</body>
+</html>

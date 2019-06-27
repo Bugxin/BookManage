@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>出品集</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div>
+        <a type="button" class="btn btn-info center-block" href="/app01/index/">回到首页</a>
+    </div>
+    <table class="table table-striped  table-bordered">
+      <thead>
+        <tr>
+            <th>编号</th>
+            <th>书名</th>
+            <th>价格</th>
+            <th>出版日期</th>
+            <th>出版社</th>
+            <th>作者</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in book_list %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.publishDate|date:'Y-m-d' }}</td>
+                <td>{{ item.publish.name }}</td>
+                <td>
+                    {% for author in item.authors.all %}
+                        {% if forloop.last %}
+                            <span>{{ author.name }}</span>
+                        {% else %}
+                            <span>{{ author.name }}</span>,
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr ><td colspan="6" align="center">未查询到结果</td></tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+    {#  分页  #}
+    {% include 'app01/my_page.html' %}
+</div>
+</body>
+</html>

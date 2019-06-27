@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>注册</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-lg-offset-3">
+                <form action="" method="post">
+{#                    {% csrf_token %}#}
+                    {% for field in form %}
+                        {% if field == form.r_pwd %}
+                            <div>
+                                <label for="">{{ field.label }}</label>
+                                {{ field }}<span class="pull-right" style="color: red">{{ errors.0 }}</span>
+                            </div>
+                        {% else %}
+                            <div>
+                                <label for="">{{ field.label }}</label>
+                                {{ field }} <span class="pull-right" style="color: red">{{ field.errors.0}}</span>
+                            </div>
+                        {% endif %}
+
+                    {% endfor %}
+                    <input type="submit" class="pull-right btn btn-info">
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

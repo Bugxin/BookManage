@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>按出版社查找</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div>
+                <a type="button" class="btn btn-info center-block" href="/app01/index/">回到首页</a>
+            </div>
+            <table class="table table-striped  table-bordered">
+                <thead>
+                <tr>
+                    <th>编号</th>
+                    <th>出版社</th>
+                    <th>城市</th>
+                    <th>邮箱</th>
+                    <th>作品</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for publish in publish_list %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ publish.name }}</td>
+                            <td>{{ publish.city }}</td>
+                            <td>{{ publish.email }}</td>
+                            <td><a class="btn btn-success" href="app01/publish_books/{{ publish.pk }}/">查看</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {#  分页  #}
+            {% include 'app01/my_page.html' %}
+        </div>
+    </div>
+</body>
+</html>

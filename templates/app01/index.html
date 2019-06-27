@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>图书管理系统</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+</head>
+<body >
+    <div class="container">
+        <ul class="nav nav-tabs">
+            <li role="presentation"><a href="/app01/books">图书列表</a></li>
+            <li role="presentation"><a href="/app01/publishes">出版社列表</a></li>
+            <li role="presentation"><a href="/app01/authors">作者列表</a></li>
+            <li role="presentation"><a type="button" data-toggle="modal" data-target="#authorModal">添加作者</a></li>
+            <li role="presentation"><a type="button" data-toggle="modal" data-target="#publishModal">添加出版社</a></li>
+            {% if login_state %}
+                <li role="presentation" class="pull-right" id="id_logout"><a href="/app01/logout">注销</a></li>
+                <li role="presentation" class="pull-right"><a href="#">{{ username }}</a></li>
+            {% else %}
+                <li role="presentation" class="pull-right" id="id_login"><a href="/app01/login">登录</a></li>
+                <li role="presentation" class="pull-right" id="id_reg"><a href="/app01/reg">注册</a></li>
+           {% endif %}
+        </ul>
+    </div>
+
+    {#作者模态框#}
+    <div class="modal fade" id="authorModal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                   <h4 class="modal-title" id="myModalLabel">添加作者</h4>
+               </div>
+               <div class="modal-body">
+                   <form>
+                       <div class="form-group">
+                            <label>姓名</label>
+                            <input type="text" class="form-control" name="name" id="id_authorname">
+                        </div>
+                       <div class="form-group">
+                           <label>年龄</label>
+                           <input type="text" class="form-control" name="age" id="id_age">
+                       </div>
+                       <div class="form-group">
+                           <label>生日</label>
+                           <input type="date" class="form-control" name="birth" id="id_birth">
+                       </div>
+                       <div class="form-group">
+                            <label>电话</label>
+                            <input type="text" class="form-control" name="tel" id="id_tel">
+                        </div>
+                       <div class="form-group">
+                           <label>地址</label>
+                           <input type="text" class="form-control" name="addr" id="id_addr">
+                       </div>
+
+                   </form>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-primary" id="id_addauthor">添加</button>
+               </div>
+           </div><!-- /.modal-content -->
+       </div><!-- /.modal -->
+    </div>
+
+    {#出版社模态框#}
+
+    <div class="modal fade" id="publishModal" tabindex="-1" role="dialog"
+         aria-labelledby="myModalLabel" aria-hidden="true">
+       <div class="modal-dialog">
+           <div class="modal-content">
+               <div class="modal-header">
+                   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                   <h4 class="modal-title" id="myModalLabel">添加出版社</h4>
+               </div>
+               <div class="modal-body">
+                   <form>
+                       <div class="form-group">
+                            <label>出版社名称</label>
+                            <input type="text" class="form-control" name="title" id="id_publishname">
+                        </div>
+                       <div class="form-group">
+                           <label>城市</label>
+                           <input type="text" class="form-control" name="title" id="id_city">
+                       </div>
+                       <div class="form-group">
+                           <label>email</label>
+                           <input type="text" class="form-control" name="title" id="id_email">
+                       </div>
+                   </form>
+               </div>
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-primary" id="id_addpublish">添加</button>
+               </div>
+           </div><!-- /.modal-content -->
+       </div><!-- /.modal -->
+    </div>
+
+<script src="https://cdn.bootcdn.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+    {# 添加作者  #}
+    $('#id_addauthor').click(function () {
+        $.ajax({
+            url:'/app01/addauthor/',
+            type:'post',
+            contentType: 'application/json; charset=UTF-8',
+            data:JSON.stringify({
+                'name': $('#id_authorname').val(),
+                'age': $('#id_age').val(),
+                'addr': $('#id_addr').val(),
+                'tel': $('#id_tel').val(),
+                'birth': $('#id_birth').val()
+            }),
+            success:function (data) {
+                let res = JSON.parse(data)
+                if (res.state){
+                    {#添加成功 #}
+                    alert('添加成功')
+                    location.href = '/app01/index/'
+                }
+                else {
+                    {#添加失败 #}
+                    alert(res.msg)
+                }
+            }
+        })
+    });
+
+    {# 添加出版社 #}
+    $('#id_addpublish').click(function () {
+        $.ajax({
+            url:'/app01/addpublish/',
+            type: 'post',
+            contentType: 'application/json; charset=UTF-8',
+            data:JSON.stringify({
+                name: $('#id_publishname').val(),
+                city: $('#id_city').val(),
+                email: $('#id_email').val(),
+            }),
+            success:function (data) {
+                let res = JSON.parse(data)
+                if (res.state){
+                    {#添加成功 跳转查看书籍#}
+                    alert('添加成功')
+                    location.href = '/app01/index/'
+                }
+                else {
+                    {#添加失败 弹出警告框#}
+                    alert(res.msg)
+                }
+            }
+        })
+    });
+</script>
+</body>
+</html>
